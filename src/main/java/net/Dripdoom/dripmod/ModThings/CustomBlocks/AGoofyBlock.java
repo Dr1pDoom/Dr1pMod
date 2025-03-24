@@ -29,8 +29,7 @@ import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import java.util.List;
 import java.util.Objects;
 
-
-public class AGoofyBlock extends Block{
+public class AGoofyBlock extends Block {
 
     public AGoofyBlock(Properties p_49795_) {
         super(p_49795_);
@@ -82,7 +81,8 @@ public class AGoofyBlock extends Block{
                 Vec3 playerPosition = item.getOwner().position();
                 Vec2 playerRotation = item.getOwner().getRotationVector();
                 int ItemDroppedCount = item.getItem().getCount();
-                item.remove(Entity.RemovalReason.DISCARDED);
+
+                item.remove(Entity.RemovalReason.DISCARDED); // keeping this over coal transformation
 
                 for(int i = ItemDroppedCount; i <= ItemDroppedCount; i++){
                     pLevel.addFreshEntity(lightningBolt);
