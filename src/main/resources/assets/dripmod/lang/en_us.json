@@ -1,0 +1,9 @@
+{
+  "item.dripmod.chisel": "Chisel",
+  "creativetab.dripmod.Chisel_Item": "Chisel Tab",
+  "creativetab.dripmod.alexandrite_items" : "Alexandrite Items Tab",
+  "item.dripmod.raw_alexandrite": "Raw Alexandrite",
+  "item.dripmod.alexandrite": "Alexandrite",
+  "block.dripmod.raw_alexandrite_block": "Block of Raw Alexandrite",
+  "block.dripmod.alexandrite_block" : "Block of Alexandrite"
+}

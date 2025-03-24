@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "dripmod:block/alexandrite_block"
+    }
+  }
+}
