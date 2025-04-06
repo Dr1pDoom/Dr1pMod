@@ -20,6 +20,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
@@ -47,12 +49,11 @@ public class AGoofyStuff extends Item
 
     public static final Map<Block, Block> BLOCK_MAP =
             Map.of(
-                    Blocks.STONE, Blocks.COBBLESTONE,
                     Blocks.ACACIA_WOOD, Blocks.ACACIA_LEAVES,
                     Blocks.COBBLESTONE, Blocks.STONE,
                     Blocks.BEDROCK, Blocks.OBSIDIAN,
                     Blocks.DIAMOND_BLOCK, Blocks.ACACIA_LEAVES,
-                    Blocks.AMETHYST_BLOCK, Blocks.DIRT,
+                    Blocks.STONE, Blocks.GLASS,
                     ModBlocks.Raw_Alexandrite_Block.get(), Blocks.RAW_IRON_BLOCK,
                     ModBlocks.Alexandrite_Block.get(), Blocks.WATER
             );
@@ -76,19 +77,20 @@ public class AGoofyStuff extends Item
         Level level = pContext.getLevel();
         Block clickedblock = level.getBlockState(pContext.getClickedPos()).getBlock();
         BlockPos blockPos = pContext.getClickedPos();
-        double PosX = pContext.getClickedPos().getX();
-        double PosY = pContext.getClickedPos().getY();
-        double PosZ = pContext.getClickedPos().getZ();
-
-        if(level.isClientSide && BLOCK_MAP.containsKey(clickedblock)){
-            spawnParticles(ParticleTypes.ANGRY_VILLAGER, level, PosX, PosY + 1, PosZ, 0.5);
-        }
+        Vec2 PlayerRotation = pContext.getPlayer().getRotationVector();
+        float PlayerRotationX = PlayerRotation.x;
+        float PlayerRotationY = PlayerRotation.y;
+        LightningBolt lightningBolt = EntityType.LIGHTNING_BOLT.create(level);
 
         if(!level.isClientSide && BLOCK_MAP.containsKey(clickedblock)) {
             level.setBlockAndUpdate(pContext.getClickedPos(), BLOCK_MAP.get(clickedblock).defaultBlockState());
 
             pContext.getItemInHand().hurtAndBreak(1, ((ServerLevel) level), ((ServerPlayer)pContext.getPlayer()),
                     item -> pContext.getPlayer().onEquippedItemBroken(item, EquipmentSlot.MAINHAND));
+
+            assert lightningBolt != null;
+            level.addFreshEntity(lightningBolt);
+            lightningBolt.moveTo(blockPos, PlayerRotationY, PlayerRotationX);
 
             level.playSound(null, blockPos, SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.BLOCKS);
         }
@@ -101,15 +103,30 @@ public class AGoofyStuff extends Item
 
         Level level = Target.level();
         BlockPos pos = Target.getOnPos();
+        Vec3 Coords = new Vec3(0, 1f, 0);
+        Vec3 TargetPos = Target.getPosition(1);
+        Vec2 TargetRotation = Target.getRotationVector();
+        float TRotationX = TargetRotation.x;
+        float TRotationY = TargetRotation.y;
+        LightningBolt lightningBolt = EntityType.LIGHTNING_BOLT.create(level);
+
         if(!(Target.level().isClientSide && pAttacker.level().isClientSide))
         {
+            level.setBlockAndUpdate(pos, Blocks.REDSTONE_BLOCK.defaultBlockState());
+            if(level.getBlockState(pos).is(Blocks.REDSTONE_BLOCK)){
+                for(int i = 0; i <= 30; i++) {
+                    level.setBlockAndUpdate(pos.above(), Blocks.REDSTONE_LAMP.defaultBlockState());
+                }
+            }
             Target.addEffect(new MobEffectInstance(MobEffects.GLOWING,
                         200, 5));
 
-            level.playSound(null, pos, SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.BLOCKS);
-
             Target.move(MoverType.PLAYER, new Vec3(0f, 10f, 0f));
             //Target.push(new Vec3(0f, 1f, 0f));
+
+            assert lightningBolt != null;
+            level.addFreshEntity(lightningBolt);
+            lightningBolt.moveTo(TargetPos, TRotationY, TRotationX);
         }
         return super.hurtEnemy(pStack, Target, pAttacker);
     }
