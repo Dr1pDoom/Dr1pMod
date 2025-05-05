@@ -1,0 +1,14 @@
+## Credits
+
+The following textures used in this mod were created by **Kaupenjoe**:
+
+- `alexandrite.png`
+- `raw_alexandrite.png`
+- `alexandrite_block.png`
+- `raw_alexandrite_block.png`
+- `chisel.png`
+
+All credit for these textures goes to **Kaupenjoe**.  
+You can find more of his work here:
+- GitHub: [https://github.com/Kaupenjoe](https://github.com/Kaupenjoe)
+- YouTube (Modding Tutorials): [https://www.youtube.com/@Kaupenjoe](https://www.youtube.com/@Kaupenjoe)
