@@ -2,6 +2,7 @@ package net.Dripdoom.dripmod.ModThings.CustomBlocks.BlockRegistries;
 
 import net.Dripdoom.dripmod.DripMod;
 import net.Dripdoom.dripmod.ModThings.CustomBlocks.AGoofyBlock;
+import net.Dripdoom.dripmod.ModThings.CustomBlocks.ItemDisplayerBlock;
 import net.Dripdoom.dripmod.ModThings.CustomItems.ItemRegistries.ModItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -31,6 +32,9 @@ public class ModBlocks {
                     .strength(3f, 600f)
                     ));
 
+    public static final RegistryObject<Block> ItemDisplayerBlock = registerBLock("item_displayer_block",
+            () -> new ItemDisplayerBlock(BlockBehaviour.Properties.ofFullCopy(Raw_Alexandrite_Block.get()).noOcclusion()));
+
     private static <T extends Block> RegistryObject<T> registerBLock(String name, Supplier<T> block){
         RegistryObject<T> toReturn = BLOCKS.register(name, block);
         registerBlockItem(name, toReturn);
@@ -50,8 +54,6 @@ public class ModBlocks {
     private static <K extends AGoofyBlock> void registerGoofyBlockItem(String name, RegistryObject<K> block){
         ModItem.ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties()));
     }
-
-
 
     public static void register(IEventBus eventbus){
         BLOCKS.register(eventbus);

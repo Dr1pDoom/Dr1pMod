@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "dripmod:block/item_displayer_block"
+    }
+  }
+}

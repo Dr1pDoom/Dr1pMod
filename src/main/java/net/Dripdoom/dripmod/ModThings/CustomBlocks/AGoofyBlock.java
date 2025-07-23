@@ -2,32 +2,23 @@ package net.Dripdoom.dripmod.ModThings.CustomBlocks;
 
 import net.Dripdoom.dripmod.ModThings.CustomItems.ItemRegistries.ModItem;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 
 import java.util.List;
-import java.util.Objects;
 
 public class AGoofyBlock extends Block {
 
@@ -44,10 +35,14 @@ public class AGoofyBlock extends Block {
     protected int getAnalogOutputSignal(BlockState pState, Level pLevel, BlockPos pPos) {
         ResourceKey<Level> dimension = pLevel.dimension();
         double PosX = pPos.getX();
-        double PosY = pPos.getY();
-        double AbsoluteValueModifier = PosX * PosY * 0.01;
+        double PosZ = pPos.getZ();
+        double AbsoluteValueModifier = PosX * PosZ * 0.01;
         if(dimension == Level.NETHER){
-            return 2 * (int)AbsoluteValueModifier;
+            int value = 2 * (int)AbsoluteValueModifier;
+            if(value >= 15){
+                return 15;
+            }
+            return value;
         }
         return 15;
     }
@@ -83,11 +78,6 @@ public class AGoofyBlock extends Block {
                 int ItemDroppedCount = item.getItem().getCount();
 
                 item.remove(Entity.RemovalReason.DISCARDED); // keeping this over coal transformation
-
-                for(int i = ItemDroppedCount; i <= ItemDroppedCount; i++){
-                    pLevel.addFreshEntity(lightningBolt);
-                    lightningBolt.moveTo(playerPosition, playerRotation.y, playerRotation.x);
-                }
             }
         }
         super.stepOn(pLevel, pPos, pState, pEntity);
