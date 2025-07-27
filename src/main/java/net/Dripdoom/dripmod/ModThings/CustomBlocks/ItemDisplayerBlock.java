@@ -1,30 +1,24 @@
 package net.Dripdoom.dripmod.ModThings.CustomBlocks;
 
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
-import net.Dripdoom.dripmod.ModThings.CustomBlocks.BlockRegistries.ModBlockEntities;
 import net.Dripdoom.dripmod.ModThings.CustomBlocks.CustomBlockEntities.ItemDisplayerBlockEntity;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.protocol.Packet;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ItemDisplayerBlock extends BaseEntityBlock {
@@ -45,41 +39,56 @@ public class ItemDisplayerBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected RenderShape getRenderShape(BlockState pState) {
+    protected @NotNull RenderShape getRenderShape(@NotNull BlockState pState) {
         return RenderShape.MODEL;
     }
 
     @Override
-    public @Nullable BlockEntity newBlockEntity(BlockPos pPos, BlockState pState) {
+    public @Nullable BlockEntity newBlockEntity(@NotNull BlockPos pPos, @NotNull BlockState pState) {
         return new ItemDisplayerBlockEntity(pPos, pState);
     }
 
     @Override
-    protected void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pMovedByPiston) {
+    protected boolean isPathfindable(BlockState pState, PathComputationType pPathComputationType) {
+        return false;
+    }
+
+    @Override
+    protected void onRemove(BlockState pState, @NotNull Level pLevel, @NotNull BlockPos pPos, BlockState pNewState, boolean pMovedByPiston) {
         if(pState.getBlock() != pNewState.getBlock()){
             if(pLevel.getBlockEntity(pPos) instanceof ItemDisplayerBlockEntity itemDisplayerBlockEntity){
-                popResource(pLevel, pPos, itemDisplayerBlockEntity.drops());
-                pLevel.updateNeighbourForOutputSignal(pPos, pState.getBlock());
+                for(int j = 0; j < itemDisplayerBlockEntity.drops().size(); j++){
+                    ItemStack items = itemDisplayerBlockEntity.drops().get(j);
+                    popResource(pLevel, pPos, items);
+                    pLevel.updateNeighbourForOutputSignal(pPos, pState.getBlock());
+                }
+                itemDisplayerBlockEntity.clearContents();
             }
         }
         super.onRemove(pState, pLevel, pPos, pNewState, pMovedByPiston);
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack pStack, BlockState pState,
-                                              Level pLevel, BlockPos pPos, Player pPlayer,
-                                              InteractionHand pHand, BlockHitResult pHitResult) {
+    @NotNull
+    protected ItemInteractionResult useItemOn(@NotNull ItemStack pStack, @NotNull BlockState pState,
+                                                       Level pLevel, @NotNull BlockPos pPos, @NotNull Player pPlayer,
+                                                       @NotNull InteractionHand pHand, @NotNull BlockHitResult pHitResult) {
         if(pLevel.getBlockEntity(pPos) instanceof ItemDisplayerBlockEntity itemDisplayerBlockEntity){
-            if(itemDisplayerBlockEntity.inventory.getStackInSlot(0).isEmpty() && !pStack.isEmpty()){
-                itemDisplayerBlockEntity.inventory.insertItem(0, pStack.copy(), false);
-                pStack.shrink(1);
-                pLevel.playSound(pPlayer, pPos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1f, 2f);
+            for (int slot = 0; slot < itemDisplayerBlockEntity.inventory.getSlots(); slot++){
+                if(itemDisplayerBlockEntity.inventory.getStackInSlot(slot).isEmpty() && !pStack.isEmpty()){
+                    itemDisplayerBlockEntity.inventory.insertItem(slot, pStack.copy(), false);
+                    pStack.shrink(1);
+                    pLevel.playSound(pPlayer, pPos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1f, 2f);
+                    break;
+                }
             }
-            if(!itemDisplayerBlockEntity.inventory.getStackInSlot(0).isEmpty() && pPlayer.getItemInHand(pHand).isEmpty() && pPlayer.isCrouching()){
-
-                pPlayer.setItemInHand(pHand, itemDisplayerBlockEntity.inventory.extractItem(0, 1, false));
-                itemDisplayerBlockEntity.inventory.getStackInSlot(0).setCount(0);
-                pLevel.playSound(pPlayer, pPos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1f, 2f);
+            if(!itemDisplayerBlockEntity.inventory.getStackInSlot(0).isEmpty() && pPlayer.getItemInHand(pHand).isEmpty()){
+                for(int o = 0; o < itemDisplayerBlockEntity.inventory.getSlots(); o++){
+                    if(!itemDisplayerBlockEntity.inventory.getStackInSlot(o).isEmpty()){
+                        pPlayer.setItemInHand(pHand, itemDisplayerBlockEntity.inventory.extractItem(0, 1, false));
+                        pLevel.playSound(pPlayer, pPos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1f, 2f);
+                    }
+                }
             }
         }
 

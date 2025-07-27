@@ -11,31 +11,28 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class ItemDisplayerBlockEntity extends BlockEntity {
-    public final ItemStackHandler inventory = new ItemStackHandler(1){
+import java.util.ArrayList;
+import java.util.List;
 
-        public void hello(){System.out.println("Nigga !");}
+public class ItemDisplayerBlockEntity extends BlockEntity {
+    public final ItemStackHandler inventory = new ItemStackHandler(2){
         @Override
         protected int getStackLimit(int slot, @NotNull ItemStack stack) {
             return 1;
         }
 
         @Override
-        protected void onContentsChanged(int slot) {
-            setChanged();
-            hello();
-        }
+        protected void onContentsChanged(int slot) {setChanged();}
     };
 
     public void clearContents(){
-        for(int i = 0; i <= inventory.getSlots(); i++){
+        for(int i = 0; i < inventory.getSlots(); i++){
             inventory.setStackInSlot(i, ItemStack.EMPTY);
         }
     }
@@ -43,11 +40,16 @@ public class ItemDisplayerBlockEntity extends BlockEntity {
         super(ModBlockEntities.ItemDisplayerEntity.get(), pPos, pBlockState);
     }
 
-    public ItemStack drops() {
-        for (int i = 0; i <= inventory.getSlots(); i++) {
-            return inventory.getStackInSlot(i);
+    public List<ItemStack> drops() {
+        List<ItemStack> items = new ArrayList<>();
+        for (int i = 0; i < inventory.getSlots(); i++) {
+            ItemStack Items = inventory.getStackInSlot(i);
+            items.add(Items.copy());
         }
-        return ItemStack.EMPTY;
+        if(!items.isEmpty()){
+            return items;
+        }
+        return items;
     }
 
     @Override
