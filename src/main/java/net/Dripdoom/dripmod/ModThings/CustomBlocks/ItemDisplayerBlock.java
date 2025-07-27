@@ -73,23 +73,19 @@ public class ItemDisplayerBlock extends BaseEntityBlock {
     protected ItemInteractionResult useItemOn(@NotNull ItemStack pStack, @NotNull BlockState pState,
                                                        Level pLevel, @NotNull BlockPos pPos, @NotNull Player pPlayer,
                                                        @NotNull InteractionHand pHand, @NotNull BlockHitResult pHitResult) {
-        if(pLevel.getBlockEntity(pPos) instanceof ItemDisplayerBlockEntity itemDisplayerBlockEntity){
-            for (int slot = 0; slot < itemDisplayerBlockEntity.inventory.getSlots(); slot++){
-                if(itemDisplayerBlockEntity.inventory.getStackInSlot(slot).isEmpty() && !pStack.isEmpty()){
+        if(pLevel.getBlockEntity(pPos) instanceof ItemDisplayerBlockEntity itemDisplayerBlockEntity) {
+            for (int slot = 0; slot < itemDisplayerBlockEntity.inventory.getSlots(); slot++) {
+                if (itemDisplayerBlockEntity.inventory.getStackInSlot(slot).isEmpty() && !pStack.isEmpty()) {
                     itemDisplayerBlockEntity.inventory.insertItem(slot, pStack.copy(), false);
                     pStack.shrink(1);
                     pLevel.playSound(pPlayer, pPos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1f, 2f);
-                    break;
+                }
+                else if (!itemDisplayerBlockEntity.inventory.getStackInSlot(slot).isEmpty() && !pPlayer.getItemInHand(pHand).isEmpty()) {
+                    pPlayer.setItemInHand(pHand, itemDisplayerBlockEntity.inventory.extractItem(slot, 1, false));
+                    pLevel.playSound(pPlayer, pPos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1f, 2f);
                 }
             }
-            if(!itemDisplayerBlockEntity.inventory.getStackInSlot(0).isEmpty() && pPlayer.getItemInHand(pHand).isEmpty()){
-                for(int o = 0; o < itemDisplayerBlockEntity.inventory.getSlots(); o++){
-                    if(!itemDisplayerBlockEntity.inventory.getStackInSlot(o).isEmpty()){
-                        pPlayer.setItemInHand(pHand, itemDisplayerBlockEntity.inventory.extractItem(0, 1, false));
-                        pLevel.playSound(pPlayer, pPos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1f, 2f);
-                    }
-                }
-            }
+
         }
 
         return ItemInteractionResult.SUCCESS;
